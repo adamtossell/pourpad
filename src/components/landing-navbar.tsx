@@ -1,3 +1,5 @@
+import Link from "next/link"
+
 import { Button } from "@/components/ui/button"
 
 export function LandingNavbar() {
@@ -5,7 +7,7 @@ export function LandingNavbar() {
     <header className="border-b">
       <nav className="mx-auto max-w-7xl px-6 py-4">
         <div className="flex items-center justify-between">
-          <div className="text-xl font-medium tracking-tight">
+          <div className="text-xl font-medium tracking-tight font-sans">
             Pourpad
           </div>
           
@@ -19,11 +21,11 @@ export function LandingNavbar() {
           </div>
           
           <div className="flex items-center gap-3">
-            <Button variant="outline" className="font-medium tracking-tight">
-              Log in
+            <Button asChild variant="outline" className="font-medium tracking-tight">
+              <Link href="/login">Log in</Link>
             </Button>
-            <Button variant="default" className="font-medium tracking-tight">
-              Sign up
+            <Button asChild variant="default" className="font-medium tracking-tight">
+              <Link href="/signup">Sign up</Link>
             </Button>
           </div>
         </div>

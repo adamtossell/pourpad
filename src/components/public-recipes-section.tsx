@@ -71,8 +71,8 @@ export function PublicRecipesSection() {
         </div>
         
         <div className="space-y-6">
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="rounded-full bg-muted p-3 mb-4">
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="rounded-full bg-white border border-border shadow-xs p-3 mb-4">
               <Coffee className="h-4 w-4 text-muted-foreground" />
             </div>
             <h3 className="text-lg font-medium tracking-tight">No recipes yet</h3>
