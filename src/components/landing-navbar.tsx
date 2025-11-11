@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button"
 export function LandingNavbar() {
   return (
     <header className="border-b">
-      <nav className="mx-auto max-w-6xl px-6 py-4">
+      <nav className="mx-auto max-w-7xl px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="text-xl font-medium tracking-tight">
             Pourpad
@@ -19,7 +19,7 @@ export function LandingNavbar() {
           </div>
           
           <div className="flex items-center gap-3">
-            <Button variant="ghost" className="font-medium tracking-tight">
+            <Button variant="outline" className="font-medium tracking-tight">
               Log in
             </Button>
             <Button variant="default" className="font-medium tracking-tight">
