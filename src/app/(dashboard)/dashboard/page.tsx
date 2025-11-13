@@ -1,3 +1,5 @@
+import { LayoutGrid, Table as TableIcon } from "lucide-react"
+
 import { RecipeGeneratorSection } from "@/components/recipe-generator-section"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DailyBrewsTable } from "@/components/dashboard/daily-brews-table"
@@ -43,9 +45,27 @@ export default async function DashboardPage() {
           <RecipeGeneratorSection />
         </TabsContent>
 
-        <TabsContent value="daily" className="space-y-10">
-          <DailyBrewsTable recipes={dailyBrews} author={author} />
-          <DailyBrewsGrid recipes={dailyBrews} author={author} />
+        <TabsContent value="daily">
+          <Tabs defaultValue="table" className="space-y-6">
+            <div className="flex justify-end">
+              <TabsList className="ml-auto">
+                <TabsTrigger value="table" className="h-9 w-9 p-0">
+                  <TableIcon className="h-4 w-4" aria-hidden="true" />
+                  <span className="sr-only">Table view</span>
+                </TabsTrigger>
+                <TabsTrigger value="grid" className="h-9 w-9 p-0">
+                  <LayoutGrid className="h-4 w-4" aria-hidden="true" />
+                  <span className="sr-only">Grid view</span>
+                </TabsTrigger>
+              </TabsList>
+            </div>
+            <TabsContent value="table">
+              <DailyBrewsTable recipes={dailyBrews} author={author} />
+            </TabsContent>
+            <TabsContent value="grid">
+              <DailyBrewsGrid recipes={dailyBrews} author={author} />
+            </TabsContent>
+          </Tabs>
         </TabsContent>
 
         <TabsContent value="saved">

@@ -31,7 +31,7 @@ export function RecipeDetailsDialog({ recipe, triggerLabel = "View details" }: R
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" className="w-full">
           {triggerLabel}
         </Button>
       </AlertDialogTrigger>
