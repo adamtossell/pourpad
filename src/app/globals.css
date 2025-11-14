@@ -51,8 +51,8 @@
   --card-foreground: var(--color-stone-950);
   --popover: var(--color-white);
   --popover-foreground: var(--color-stone-950);
-  --primary: var(--color-fuchsia-400);
-  --primary-foreground: var(--color-stone-50);
+  --primary: var(--color-fuchsia-500);
+  --primary-foreground: var(--color-fuchsia-100);
   --secondary: var(--color-stone-100);
   --secondary-foreground: var(--color-stone-900);
   --muted: var(--color-stone-100);
@@ -117,7 +117,7 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground text-sm;
+    @apply bg-background text-foreground text-base;
     font-family: var(--font-geist-mono);
   }
   button,

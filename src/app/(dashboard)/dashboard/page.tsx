@@ -1,9 +1,6 @@
-import { LayoutGrid, Table as TableIcon } from "lucide-react"
-
 import { RecipeGeneratorSection } from "@/components/recipe-generator-section"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { DailyBrewsTable } from "@/components/dashboard/daily-brews-table"
-import { DailyBrewsGrid } from "@/components/dashboard/daily-brews-grid"
+import { DailyBrewsSection } from "@/components/dashboard/daily-brews-section"
 import { SavedRecipesGrid } from "@/components/dashboard/saved-recipes-grid"
 import { getCurrentUser } from "@/lib/auth/get-current-user"
 import type { DailyBrewSummary, RecipeAuthor, SavedRecipeSummary } from "@/lib/types/dashboard"
@@ -28,7 +25,8 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-10">
       <header className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight">Dashboard</h1>
+        <h1 className="text-2xl font-medium tracking-tight">Create, save & share your daily pours
+        </h1>
         <p className="text-muted-foreground text-sm">
           Build new brews, track your daily recipes, and revisit community favorites.
         </p>
@@ -46,26 +44,7 @@ export default async function DashboardPage() {
         </TabsContent>
 
         <TabsContent value="daily">
-          <Tabs defaultValue="table" className="space-y-6">
-            <div className="flex justify-end">
-              <TabsList className="ml-auto">
-                <TabsTrigger value="table" className="h-9 w-9 p-0">
-                  <TableIcon className="h-4 w-4" aria-hidden="true" />
-                  <span className="sr-only">Table view</span>
-                </TabsTrigger>
-                <TabsTrigger value="grid" className="h-9 w-9 p-0">
-                  <LayoutGrid className="h-4 w-4" aria-hidden="true" />
-                  <span className="sr-only">Grid view</span>
-                </TabsTrigger>
-              </TabsList>
-            </div>
-            <TabsContent value="table">
-              <DailyBrewsTable recipes={dailyBrews} author={author} />
-            </TabsContent>
-            <TabsContent value="grid">
-              <DailyBrewsGrid recipes={dailyBrews} author={author} />
-            </TabsContent>
-          </Tabs>
+          <DailyBrewsSection recipes={dailyBrews} author={author} />
         </TabsContent>
 
         <TabsContent value="saved">
@@ -178,3 +157,4 @@ function mockSavedRecipes(): SavedRecipeSummary[] {
     },
   ]
 }
+  

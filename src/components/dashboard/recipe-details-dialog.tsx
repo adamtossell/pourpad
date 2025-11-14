@@ -36,12 +36,12 @@ export function RecipeDetailsDialog({ recipe, triggerLabel = "View details" }: R
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent className="max-h-[85vh] overflow-y-auto">
-        <AlertDialogHeader className="space-y-4 text-left">
-          <div className="space-y-2">
+        <AlertDialogHeader className="space-y-3 text-left">
+          <div className="space-y-3">
             <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               {formatDate(recipe.createdAt)}
             </span>
-            <AlertDialogTitle className="text-2xl font-semibold tracking-tight">
+            <AlertDialogTitle className="text-2xl font-medium tracking-tight">
               {recipe.title}
             </AlertDialogTitle>
           </div>
@@ -53,18 +53,16 @@ export function RecipeDetailsDialog({ recipe, triggerLabel = "View details" }: R
               Brewed by {recipe.author.displayName}
             </Badge>
           </div>
-          {recipe.metadata.description ? (
-            <AlertDialogDescription className="text-left text-sm leading-relaxed text-muted-foreground">
-              {recipe.metadata.description}
-            </AlertDialogDescription>
-          ) : null}
         </AlertDialogHeader>
-
-        <section className="mt-4 space-y-3">
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-            Brew metrics
-          </h3>
-          <div className="grid gap-3 rounded-lg border bg-muted/30 p-4 sm:grid-cols-2">
+    
+        {recipe.metadata.description ? (
+          <AlertDialogDescription className="text-left text-md leading-relaxed text-muted-foreground">
+            {recipe.metadata.description}
+          </AlertDialogDescription>
+        ) : null}
+    
+        <section className="space-y-2">
+          <div className="grid gap-4 sm:grid-cols-2">
             <MetadataRow label="Coffee" value={formatNullableWeight(recipe.metadata.coffeeWeight)} />
             <MetadataRow label="Grind" value={recipe.metadata.grindSize} />
             <MetadataRow label="Water temp" value={formatNullableTemperature(recipe.metadata.waterTemp)} />
@@ -72,13 +70,13 @@ export function RecipeDetailsDialog({ recipe, triggerLabel = "View details" }: R
           </div>
         </section>
 
-        <Separator className="my-6" />
+        <Separator className="my-2" />
 
-        <section className="space-y-4">
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+        <section className="space-y-2">
+          <h3 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
             Pour schedule
           </h3>
-          <ul className="space-y-3">
+          <ul className="space-y-2">
             {pours.map((pour) => (
               <li key={pour.id} className="rounded-lg border bg-card p-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">

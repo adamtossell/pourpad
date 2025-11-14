@@ -17,7 +17,7 @@ export default async function AccountPage() {
   return (
     <div className="space-y-10">
       <header className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight">Account</h1>
+        <h1 className="text-2xl font-medium tracking-tight">Account</h1>
         <p className="text-muted-foreground text-sm">
           Update your profile, manage login credentials, and control your data.
         </p>
