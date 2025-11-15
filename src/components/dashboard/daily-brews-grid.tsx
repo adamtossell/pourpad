@@ -5,9 +5,12 @@ import { Search, X } from "lucide-react"
 
 import type { DailyBrewSummary } from "@/lib/types/dashboard"
 import { DailyBrewExpandableCard } from "@/components/dashboard/daily-brew-expandable-card"
-import { Input } from "@/components/ui/input"
-import { InputGroup, InputLeftAddon, InputRightAddon } from "@/components/ui/input-group"
-import { Button } from "@/components/ui/button"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/input-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 type DailyBrewsGridProps = {
@@ -53,29 +56,29 @@ export function DailyBrewsGrid({ recipes }: DailyBrewsGridProps) {
     <div className="space-y-2">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <InputGroup className="sm:max-w-sm">
-          <InputLeftAddon>
-            <Search className="h-4 w-4" aria-hidden="true" />
-          </InputLeftAddon>
-          <Input
+          <InputGroupAddon align="inline-start">
+            <Search className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+          </InputGroupAddon>
+          <InputGroupInput
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search your brews"
-            className="pl-9 pr-10"
             aria-label="Search daily brews"
+            className="pl-1"
           />
           {query ? (
-            <InputRightAddon>
-              <Button
+            <InputGroupAddon align="inline-end">
+              <InputGroupButton
                 type="button"
                 variant="ghost"
-                size="icon"
-                className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                size="icon-sm"
+                className="text-muted-foreground hover:text-foreground"
                 onClick={() => setQuery("")}
                 aria-label="Clear search"
               >
                 <X className="h-4 w-4" aria-hidden="true" />
-              </Button>
-            </InputRightAddon>
+              </InputGroupButton>
+            </InputGroupAddon>
           ) : null}
         </InputGroup>
 
