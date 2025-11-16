@@ -22,6 +22,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import type { DefaultGrinder } from "@/lib/types/grinders"
 import { formatScaleTypeLabel, GRINDER_SCALE_META } from "@/lib/constants/grinders"
+import { cn } from "@/lib/utils"
 import {
   grinderScaleTypes,
   type GrinderCreateFormValues,
@@ -54,6 +55,14 @@ export function ManageGrindersDialog({
   onSubmit,
   isSubmitting,
 }: ManageGrindersDialogProps) {
+  const [activePresetId, setActivePresetId] = React.useState<string | null>(null)
+
+  React.useEffect(() => {
+    if (!open) {
+      setActivePresetId(null)
+    }
+  }, [open])
+
   const handleDialogSubmit = React.useCallback(
     (event: React.FormEvent<HTMLFormElement>) => {
       event.stopPropagation()
@@ -78,28 +87,37 @@ export function ManageGrindersDialog({
             <h4 className="text-sm font-mono font-semibold uppercase tracking-tight text-muted-foreground">
               Platform presets
             </h4>
-            <div className="grid gap-2 sm:grid-cols-2">
-              {presets.map((preset) => (
-                <button
-                  key={preset.id}
-                  type="button"
-                  className="flex flex-col items-start rounded-lg border border-border/70 bg-muted/40 p-3 text-left transition hover:border-foreground"
-                  onClick={() => onPresetSelect(preset)}
-                >
-                  <span className="text-sm font-semibold tracking-tight">
-                    {preset.brand ? `${preset.brand} ` : ""}
-                    {preset.model}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {formatScaleTypeLabel(preset.scaleType)}
-                  </span>
-                  {preset.defaultNotation ? (
-                    <Badge variant="outline" className="mt-2 text-[11px]">
-                      Suggested: {preset.defaultNotation}
-                    </Badge>
-                  ) : null}
-                </button>
-              ))}
+            <div className="max-h-64 overflow-y-auto p-2 rounded-xl bg-accent/50">
+              <div className="grid gap-2 sm:grid-cols-2">
+                {presets.map((preset) => (
+                  <button
+                    key={preset.id}
+                    type="button"
+                    className={cn(
+                      "flex flex-col items-start rounded-lg border border-border bg-accent/50 p-3 text-left transition hover:bg-accent hover:border-foreground/10",
+                      activePresetId === preset.id &&
+                        "border-primary bg-white hover:border-primary hover:bg-white",
+                    )}
+                    onClick={() => {
+                      setActivePresetId(preset.id)
+                      onPresetSelect(preset)
+                    }}
+                  >
+                    <span className="text-sm font-semibold tracking-tight">
+                      {preset.brand ? `${preset.brand} ` : ""}
+                      {preset.model}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {formatScaleTypeLabel(preset.scaleType)}
+                    </span>
+                    {preset.defaultNotation ? (
+                      <Badge variant="outline" className="mt-2 text-[11px]">
+                        Suggested: {preset.defaultNotation}
+                      </Badge>
+                    ) : null}
+                  </button>
+                ))}
+              </div>
             </div>
           </section>
 
