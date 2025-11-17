@@ -5,7 +5,7 @@ import { ChevronDown } from "lucide-react"
 
 import type { SavedRecipeSummary } from "@/lib/types/dashboard"
 import { cn } from "@/lib/utils"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -23,6 +23,9 @@ export function SavedRecipeExpandableCard({ recipe }: SavedRecipeExpandableCardP
       <CardHeader className="gap-2">
         <div className="flex items-start gap-3">
           <Avatar className="h-9 w-9">
+            {recipe.author.avatarUrl ? (
+              <AvatarImage src={recipe.author.avatarUrl} alt={`${recipe.author.displayName}'s avatar`} />
+            ) : null}
             <AvatarFallback>{recipe.author.displayName.slice(0, 2).toUpperCase()}</AvatarFallback>
           </Avatar>
           <div className="flex flex-col leading-tight">

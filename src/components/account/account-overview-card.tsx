@@ -1,4 +1,4 @@
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
@@ -7,13 +7,15 @@ type AccountOverviewCardProps = {
   email: string
   joinedAt?: string
   avatarInitial: string
+  avatarUrl?: string | null
 }
 
-export function AccountOverviewCard({ displayName, email, joinedAt, avatarInitial }: AccountOverviewCardProps) {
+export function AccountOverviewCard({ displayName, email, joinedAt, avatarInitial, avatarUrl }: AccountOverviewCardProps) {
   return (
     <Card className="border">
       <CardHeader className="flex flex-row items-center gap-4">
         <Avatar className="h-12 w-12 text-base">
+          {avatarUrl ? <AvatarImage src={avatarUrl} alt={`${displayName}'s avatar`} /> : null}
           <AvatarFallback>{avatarInitial}</AvatarFallback>
         </Avatar>
         <div className="flex flex-col">

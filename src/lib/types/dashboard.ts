@@ -37,6 +37,7 @@ export type DailyBrewSummary = {
   createdAt: string
   description?: string | null
   brewerType: string
+  isPublic: boolean
   metadata: Omit<RecipeMetadata, "description"> & { description?: string | null }
   pours: RecipePourInfo[]
 }

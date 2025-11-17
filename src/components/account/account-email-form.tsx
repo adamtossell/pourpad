@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -42,7 +43,36 @@ export function AccountEmailForm({ initialEmail }: AccountEmailFormProps) {
   const onSubmit = async (values: EmailFormValues) => {
     setIsSubmitting(true)
     try {
-      console.log("Email submit", values)
+      const response = await fetch("/api/account/email", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
+      })
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null)
+        if (response.status === 422 && payload?.details) {
+          const details = payload.details as Record<string, string[]>
+          if (details.email?.length) {
+            form.setError("email", { message: details.email[0] })
+          }
+          if (details.password?.length) {
+            form.setError("password", { message: details.password[0] })
+          }
+        }
+
+        const message = payload?.error ?? "Failed to update email"
+        if (response.status === 401) {
+          form.setError("password", { message })
+        }
+        toast.error(message)
+        return
+      }
+
+      form.reset({ email: values.email, password: "" })
+      toast.success("Email updated")
     } finally {
       setIsSubmitting(false)
     }

@@ -1,8 +1,15 @@
 import { DailyBrewsSection } from "@/components/dashboard/daily-brews-section"
-import { getMockDailyBrews } from "@/lib/mock/dashboard"
+import { serverFetchJson } from "@/lib/server/fetch-json"
+import type { DailyBrewSummary } from "@/lib/types/dashboard"
 
-export default function DashboardDailyBrewsPage() {
-  const dailyBrews = getMockDailyBrews()
+type DailyBrewsPayload = {
+  dailyBrews: DailyBrewSummary[]
+}
+
+export default async function DashboardDailyBrewsPage() {
+  const { data, error } = await serverFetchJson<DailyBrewsPayload>("/api/dashboard/daily-brews")
+
+  const dailyBrews = data?.dailyBrews ?? []
 
   return (
     <div className="space-y-10">
@@ -11,6 +18,9 @@ export default function DashboardDailyBrewsPage() {
         <p className="text-muted-foreground text-sm">
           Review brew notes, dial in variables, and keep an eye on your recent pour history.
         </p>
+        {error ? (
+          <p className="text-sm text-rose-500">{error.payload && typeof error.payload === "object" && "error" in (error.payload as Record<string, unknown>) ? String((error.payload as Record<string, unknown>).error) : "Unable to load daily brews."}</p>
+        ) : null}
       </header>
 
       <DailyBrewsSection recipes={dailyBrews} />

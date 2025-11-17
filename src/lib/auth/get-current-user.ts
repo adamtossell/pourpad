@@ -5,6 +5,7 @@ type CurrentUser = {
   email: string
   displayName: string
   firstInitial: string
+  avatarUrl: string | null
 }
 
 function getInitialFromDisplayName(displayName: string, email: string): string {
@@ -35,7 +36,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
 
   const { data: profile, error } = await supabase
     .from("profiles")
-    .select("display_name")
+    .select("display_name, avatar_url")
     .eq("id", user.id)
     .maybeSingle()
 
@@ -50,13 +51,29 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     "User"
 
   const firstInitial = getInitialFromDisplayName(displayName, user.email)
+  const avatarUrl = await signAvatarUrl(supabase, profile?.avatar_url ?? null)
 
   return {
     id: user.id,
     email: user.email,
     displayName,
     firstInitial,
+    avatarUrl,
   }
 }
 
 export type { CurrentUser }
+
+async function signAvatarUrl(
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
+  path: string | null,
+): Promise<string | null> {
+  if (!path) return null
+
+  const { data, error } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60)
+  if (error) {
+    console.error("Failed to sign user avatar", error)
+    return null
+  }
+  return data?.signedUrl ?? null
+}

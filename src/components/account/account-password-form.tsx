@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -50,7 +51,39 @@ export function AccountPasswordForm() {
   const onSubmit = async (values: PasswordFormValues) => {
     setIsSubmitting(true)
     try {
-      console.log("Password submit", values)
+      const response = await fetch("/api/account/password", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          currentPassword: values.currentPassword,
+          newPassword: values.newPassword,
+        }),
+      })
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null)
+        if (response.status === 422 && payload?.details) {
+          const details = payload.details as Record<string, string[]>
+          if (details.currentPassword?.length) {
+            form.setError("currentPassword", { message: details.currentPassword[0] })
+          }
+          if (details.newPassword?.length) {
+            form.setError("newPassword", { message: details.newPassword[0] })
+          }
+        }
+
+        const message = payload?.error ?? "Failed to update password"
+        if (response.status === 401) {
+          form.setError("currentPassword", { message })
+        }
+        toast.error(message)
+        return
+      }
+
+      form.reset({ currentPassword: "", newPassword: "", confirmPassword: "" })
+      toast.success("Password updated")
     } finally {
       setIsSubmitting(false)
     }

@@ -1,8 +1,15 @@
 import { SavedRecipesGrid } from "@/components/dashboard/saved-recipes-grid"
-import { getMockSavedBrews } from "@/lib/mock/dashboard"
+import { serverFetchJson } from "@/lib/server/fetch-json"
+import type { SavedRecipeSummary } from "@/lib/types/dashboard"
 
-export default function DashboardSavedBrewsPage() {
-  const savedBrews = getMockSavedBrews()
+type SavedBrewsPayload = {
+  savedBrews: SavedRecipeSummary[]
+}
+
+export default async function DashboardSavedBrewsPage() {
+  const { data, error } = await serverFetchJson<SavedBrewsPayload>("/api/dashboard/saved-brews")
+
+  const savedBrews = data?.savedBrews ?? []
 
   return (
     <div className="space-y-10">
@@ -11,6 +18,9 @@ export default function DashboardSavedBrewsPage() {
         <p className="text-muted-foreground text-sm">
           Quickly find favourite recipes, compare notes, and bring standout cups back into rotation.
         </p>
+        {error ? (
+          <p className="text-sm text-rose-500">{error.payload && typeof error.payload === "object" && "error" in (error.payload as Record<string, unknown>) ? String((error.payload as Record<string, unknown>).error) : "Unable to load saved brews."}</p>
+        ) : null}
       </header>
 
       <SavedRecipesGrid recipes={savedBrews} />
