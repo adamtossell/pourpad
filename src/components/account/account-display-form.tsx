@@ -248,6 +248,8 @@ export type ProfileBroadcastPayload = {
   userId: string
 }
 
+export type ProfileBroadcastEventDetail = ProfileBroadcastPayload | null
+
 const PROFILE_STORAGE_KEY = "pourpad:lastProfile"
 const PROFILE_EVENT_NAME = "pourpad:profile-updated"
 
@@ -261,11 +263,28 @@ function notifyProfileUpdated(payload: ProfileBroadcastPayload) {
   }
 
   try {
-    const event = new CustomEvent<ProfileBroadcastPayload>(PROFILE_EVENT_NAME, { detail: payload })
+    const event = new CustomEvent<ProfileBroadcastEventDetail>(PROFILE_EVENT_NAME, { detail: payload })
     window.dispatchEvent(event)
   } catch {
     // CustomEvent may throw in older browsers; swallow silently
   }
 }
 
-export { PROFILE_EVENT_NAME, PROFILE_STORAGE_KEY }
+function clearProfileBroadcast() {
+  if (typeof window === "undefined") return
+
+  try {
+    window.localStorage.removeItem(PROFILE_STORAGE_KEY)
+  } catch {
+    // ignore storage access issues
+  }
+
+  try {
+    const event = new CustomEvent<ProfileBroadcastEventDetail>(PROFILE_EVENT_NAME, { detail: null })
+    window.dispatchEvent(event)
+  } catch {
+    // ignore
+  }
+}
+
+export { PROFILE_EVENT_NAME, PROFILE_STORAGE_KEY, clearProfileBroadcast, notifyProfileUpdated }

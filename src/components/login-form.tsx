@@ -24,6 +24,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { PasswordInput } from "@/components/ui/password-input"
 
 const loginSchema = z.object({
   email: z.string().email("Enter a valid email"),
@@ -119,9 +120,8 @@ export function LoginForm({
                     Forgot your password?
                   </Link>
                 </div>
-                <Input
+                <PasswordInput
                   id="password"
-                  type="password"
                   disabled={isPending}
                   autoComplete="current-password"
                   {...form.register("password")}

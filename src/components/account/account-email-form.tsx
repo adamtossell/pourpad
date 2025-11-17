@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -16,7 +16,9 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { PasswordInput } from "@/components/ui/password-input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import type { AccountEmailUpdateResponse } from "@/lib/types/account"
 
 const emailSchema = z.object({
   email: z.string().email("Enter a valid email"),
@@ -27,9 +29,10 @@ type EmailFormValues = z.infer<typeof emailSchema>
 
 type AccountEmailFormProps = {
   initialEmail: string
+  onEmailChange?: (update: { email?: string }) => void
 }
 
-export function AccountEmailForm({ initialEmail }: AccountEmailFormProps) {
+export function AccountEmailForm({ initialEmail, onEmailChange }: AccountEmailFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const form = useForm<EmailFormValues>({
@@ -39,6 +42,10 @@ export function AccountEmailForm({ initialEmail }: AccountEmailFormProps) {
       password: "",
     },
   })
+
+  useEffect(() => {
+    form.reset({ email: initialEmail, password: "" })
+  }, [form, initialEmail])
 
   const onSubmit = async (values: EmailFormValues) => {
     setIsSubmitting(true)
@@ -71,8 +78,12 @@ export function AccountEmailForm({ initialEmail }: AccountEmailFormProps) {
         return
       }
 
+      const payload = (await response.json()) as AccountEmailUpdateResponse
+
       form.reset({ email: values.email, password: "" })
-      toast.success("Email updated")
+
+      onEmailChange?.({ email: values.email, pendingEmail: null })
+      toast.success(payload.message ?? "Email updated")
     } finally {
       setIsSubmitting(false)
     }
@@ -106,7 +117,7 @@ export function AccountEmailForm({ initialEmail }: AccountEmailFormProps) {
                 <FormItem>
                   <FormLabel>Password*</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="Enter password" {...field} />
+                    <PasswordInput placeholder="Enter password" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

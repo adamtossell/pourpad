@@ -2,7 +2,11 @@ import { serverFetchJson } from "@/lib/server/fetch-json"
 import type { AccountProfileResponse } from "@/lib/types/account"
 import { AccountPageClient } from "@/components/account/account-page-client"
 
-export default async function AccountPage() {
+type AccountPageProps = {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>
+}
+
+export default async function AccountPage({ searchParams }: AccountPageProps) {
   const { data, error } = await serverFetchJson<AccountProfileResponse>("/api/account/profile")
 
   if (error || !data?.profile) {
@@ -20,6 +24,8 @@ export default async function AccountPage() {
   }
 
   const profile = data.profile
+  const resolvedSearchParams = await searchParams
+  const emailConfirmed = extractEmailConfirmed(resolvedSearchParams)
 
   return (
     <div className="space-y-10">
@@ -30,7 +36,7 @@ export default async function AccountPage() {
         </p>
       </header>
 
-      <AccountPageClient initialProfile={profile} />
+      <AccountPageClient initialProfile={profile} emailConfirmed={emailConfirmed} />
     </div>
   )
 }
@@ -48,4 +54,13 @@ function extractErrorMessage(error: unknown): string {
   }
 
   return "Unable to load account details."
+}
+
+function extractEmailConfirmed(searchParams?: Record<string, string | string[] | undefined>): boolean {
+  if (!searchParams) return false
+  const param = searchParams["email-confirmed"]
+  if (Array.isArray(param)) {
+    return param.includes("1")
+  }
+  return param === "1"
 }

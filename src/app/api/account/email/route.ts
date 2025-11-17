@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 
 import { z } from "zod"
 
-import { createRouteHandlerSupabaseClient } from "@/lib/supabase"
+import { createRouteHandlerSupabaseClient, createSupabaseAdminClient } from "@/lib/supabase"
 import type { AccountEmailUpdateResponse } from "@/lib/types/account"
 import type { ApiErrorResponse } from "@/lib/types/recipes"
 
@@ -45,7 +45,12 @@ export async function PUT(request: Request) {
   }
 
   if (payload.email === user.email) {
-    return NextResponse.json<AccountEmailUpdateResponse>({ success: true, message: "Email unchanged" })
+    return NextResponse.json<AccountEmailUpdateResponse>({
+      success: true,
+      confirmationRequired: false,
+      pendingEmail: null,
+      message: "Email unchanged",
+    })
   }
 
   const reauth = await supabase.auth.signInWithPassword({ email: user.email, password: payload.password })
@@ -54,11 +59,23 @@ export async function PUT(request: Request) {
     return NextResponse.json<ApiErrorResponse>({ error: "Incorrect password" }, { status: 401 })
   }
 
-  const update = await supabase.auth.updateUser({ email: payload.email })
-  if (update.error) {
-    console.error("Failed to update email", update.error)
-    return NextResponse.json<ApiErrorResponse>({ error: update.error.message || "Failed to update email" }, { status: 400 })
+  const admin = createSupabaseAdminClient()
+  const adminUpdate = await admin.auth.admin.updateUserById(user.id, {
+    email: payload.email,
+    email_confirm: true,
+  })
+
+  if (adminUpdate.error) {
+    console.error("Admin email update failed", adminUpdate.error)
+    return NextResponse.json<ApiErrorResponse>({ error: "Failed to update email" }, { status: 500 })
   }
 
-  return NextResponse.json<AccountEmailUpdateResponse>({ success: true, message: "Email updated" })
+  await supabase.auth.refreshSession()
+
+  return NextResponse.json<AccountEmailUpdateResponse>({
+    success: true,
+    confirmationRequired: false,
+    pendingEmail: null,
+    message: "Email updated",
+  })
 }

@@ -4,6 +4,7 @@ export type AccountProfile = {
   displayName: string
   avatarUrl: string | null
   joinedAt: string
+  pendingEmail: string | null
 }
 
 export type AccountProfileResponse = {
@@ -14,6 +15,8 @@ export type AccountProfileUpdateResponse = AccountProfileResponse
 
 export type AccountEmailUpdateResponse = {
   success: true
+  confirmationRequired: boolean
+  pendingEmail: string | null
   message?: string
 }
 

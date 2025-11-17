@@ -9,6 +9,7 @@ import { UserMenu } from "@/components/user-menu"
 import {
   PROFILE_EVENT_NAME,
   PROFILE_STORAGE_KEY,
+  type ProfileBroadcastEventDetail,
   type ProfileBroadcastPayload,
 } from "@/components/account/account-display-form"
 
@@ -24,7 +25,7 @@ export function LandingNavbarClient({ initialUser }: LandingNavbarClientProps) {
 
     const applyProfile = (payload: ProfileBroadcastPayload) => {
       setUser((prev) => {
-        const resolvedId = payload.userId || prev?.id || ""
+        const resolvedId = payload.userId || prev?.id || initialUser?.id || ""
         const next = {
           id: resolvedId,
           email: payload.email,
@@ -35,6 +36,10 @@ export function LandingNavbarClient({ initialUser }: LandingNavbarClientProps) {
 
         return prev ? { ...prev, ...next } : next
       })
+    }
+
+    const clearProfile = () => {
+      setUser(null)
     }
 
     const readStoredProfile = () => {
@@ -49,12 +54,13 @@ export function LandingNavbarClient({ initialUser }: LandingNavbarClientProps) {
     }
 
     const handleProfileEvent = (event: Event) => {
-      if (event instanceof CustomEvent) {
-        const detail = event.detail as ProfileBroadcastPayload
-        if (detail) {
-          applyProfile(detail)
-        }
+      if (!(event instanceof CustomEvent)) return
+      const detail = event.detail as ProfileBroadcastEventDetail
+      if (!detail) {
+        clearProfile()
+        return
       }
+      applyProfile(detail)
     }
 
     const handleStorageEvent = (event: StorageEvent) => {
@@ -65,6 +71,8 @@ export function LandingNavbarClient({ initialUser }: LandingNavbarClientProps) {
         } catch {
           // ignore
         }
+      } else if (event.key === PROFILE_STORAGE_KEY && event.newValue === null) {
+        clearProfile()
       }
     }
 
@@ -77,7 +85,7 @@ export function LandingNavbarClient({ initialUser }: LandingNavbarClientProps) {
       window.removeEventListener(PROFILE_EVENT_NAME, handleProfileEvent as EventListener)
       window.removeEventListener("storage", handleStorageEvent)
     }
-  }, [])
+  }, [initialUser?.id])
 
   return (
     <header className="border-b">

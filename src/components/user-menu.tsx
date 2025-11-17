@@ -18,6 +18,8 @@ import {
 import {
   PROFILE_EVENT_NAME,
   PROFILE_STORAGE_KEY,
+  clearProfileBroadcast,
+  type ProfileBroadcastEventDetail,
   type ProfileBroadcastPayload,
 } from "@/components/account/account-display-form"
 
@@ -33,7 +35,7 @@ type UserMenuProps = {
 
 export function UserMenu({ user }: UserMenuProps) {
   const [isPending, startTransition] = useTransition()
-  const [currentUser, setCurrentUser] = useState(user)
+  const [currentUser, setCurrentUser] = useState<typeof user | null>(user)
 
   useEffect(() => {
     setCurrentUser(user)
@@ -41,16 +43,13 @@ export function UserMenu({ user }: UserMenuProps) {
 
   useEffect(() => {
     const applyProfile = (payload: ProfileBroadcastPayload) => {
-      setCurrentUser((prev) => {
-        const next = {
-          ...prev,
-          displayName: payload.displayName,
-          email: payload.email,
-          firstInitial: getInitial(payload.displayName, payload.email),
-          avatarUrl: payload.avatarUrl,
-        }
-        return next
-      })
+      setCurrentUser((prev) => ({
+        displayName: payload.displayName,
+        email: payload.email,
+        firstInitial: getInitial(payload.displayName, payload.email),
+        avatarUrl: payload.avatarUrl,
+        id: payload.userId ?? prev?.id,
+      }))
     }
 
     const readStoredProfile = () => {
@@ -65,19 +64,27 @@ export function UserMenu({ user }: UserMenuProps) {
     }
 
     const handleCustomEvent = (event: Event) => {
-      if (event instanceof CustomEvent) {
-        applyProfile(event.detail as ProfileBroadcastPayload)
+      if (!(event instanceof CustomEvent)) return
+      const detail = event.detail as ProfileBroadcastEventDetail
+      if (!detail) {
+        setCurrentUser(null)
+        return
       }
+      applyProfile(detail)
     }
 
     const handleStorageEvent = (event: StorageEvent) => {
-      if (event.key === PROFILE_STORAGE_KEY && event.newValue) {
+      if (event.key !== PROFILE_STORAGE_KEY) return
+
+      if (event.newValue) {
         try {
           const parsed = JSON.parse(event.newValue) as ProfileBroadcastPayload
           applyProfile(parsed)
         } catch {
           // ignore
         }
+      } else {
+        setCurrentUser(null)
       }
     }
 
@@ -96,9 +103,15 @@ export function UserMenu({ user }: UserMenuProps) {
   }, [])
 
   const handleLogout = () => {
+    clearProfileBroadcast()
+    setCurrentUser(null)
     startTransition(() => {
       void logoutAction()
     })
+  }
+
+  if (!currentUser) {
+    return null
   }
 
   return (

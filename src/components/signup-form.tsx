@@ -24,6 +24,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { PasswordInput } from "@/components/ui/password-input"
 
 const signupSchema = z
   .object({
@@ -214,9 +215,8 @@ export function SignupForm({
                   <Field className="space-y-5">
                     <Field>
                       <FieldLabel htmlFor="password">Password</FieldLabel>
-                      <Input
+                      <PasswordInput
                         id="password"
-                        type="password"
                         disabled={isPending}
                         autoComplete="new-password"
                         {...form.register("password")}
@@ -231,9 +231,8 @@ export function SignupForm({
                       <FieldLabel htmlFor="confirm-password">
                         Confirm Password
                       </FieldLabel>
-                      <Input
+                      <PasswordInput
                         id="confirm-password"
-                        type="password"
                         disabled={isPending}
                         autoComplete="new-password"
                         {...form.register("confirmPassword")}

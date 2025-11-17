@@ -18,7 +18,7 @@ export type ServerFetchResult<T> = {
 }
 
 export async function serverFetchJson<T>(path: string, init: RequestInit = {}): Promise<ServerFetchResult<T>> {
-  const url = buildInternalUrl(path)
+  const url = await buildInternalUrl(path)
   const headersInit = new Headers(init.headers ?? {})
   const cookieHeader = await buildCookieHeader()
 
@@ -57,29 +57,26 @@ async function buildCookieHeader(): Promise<string | null> {
   return serialized.length > 0 ? serialized : null
 }
 
-function buildInternalUrl(path: string): string {
+async function buildInternalUrl(path: string): Promise<string> {
   if (path.startsWith("http://") || path.startsWith("https://")) {
     return path
   }
 
   const normalizedPath = path.startsWith("/") ? path : `/${path}`
-  const headerBase = getBaseUrlFromHeaders()
+  const headerBase = await getBaseUrlFromHeaders()
   const fallbackBase = process.env.NEXT_PUBLIC_SITE_URL || "http://127.0.0.1:3000"
 
   return `${headerBase ?? fallbackBase}${normalizedPath}`
 }
 
-function getBaseUrlFromHeaders(): string | null {
+async function getBaseUrlFromHeaders(): Promise<string | null> {
   try {
-    const headersList = headers()
+    const headersList = await headers()
     const getHeaderValue = (name: string): string | null => {
-      if (typeof (headersList as { get?: unknown }).get === "function") {
-        return (headersList as { get: (key: string) => string | null }).get(name)
-      }
-
-      const record = headersList as unknown as Record<string, string | undefined>
-      const normalizedName = name.toLowerCase()
-      return record?.[normalizedName] ?? record?.[name] ?? null
+      const value = headersList.get?.(name)
+      if (value) return value
+      const lower = headersList.get?.(name.toLowerCase())
+      return lower ?? null
     }
 
     const protocol =
@@ -94,7 +91,8 @@ function getBaseUrlFromHeaders(): string | null {
     }
 
     return `${protocol ?? "http"}://${host}`
-  } catch {
+  } catch (error) {
+    console.error("Failed to read request headers", error)
     return null
   }
 }

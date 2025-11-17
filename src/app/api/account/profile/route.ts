@@ -46,12 +46,15 @@ export async function GET() {
     return NextResponse.json<ApiErrorResponse>({ error: "Failed to load profile" }, { status: 500 })
   }
 
+  const pendingEmail = extractPendingEmail(user)
+
   const accountProfile = await buildAccountProfile(supabase, {
     id: user.id,
     email: user.email ?? "",
     displayName: profile?.display_name ?? deriveNameFromEmail(user.email ?? ""),
     avatarPath: profile?.avatar_url ?? null,
     joinedAt: profile?.created_at ?? user.created_at ?? new Date().toISOString(),
+    pendingEmail,
   })
 
   return NextResponse.json<AccountProfileResponse>({ profile: accountProfile })
@@ -141,12 +144,15 @@ export async function PUT(request: Request) {
     return NextResponse.json<ApiErrorResponse>({ error: "Failed to update profile" }, { status: 500 })
   }
 
+  const pendingEmail = extractPendingEmail(user)
+
   const accountProfile = await buildAccountProfile(supabase, {
     id: user.id,
     email: user.email ?? "",
     displayName: profile.display_name ?? parsed.data.displayName,
     avatarPath: profile.avatar_url ?? null,
     joinedAt: profile.created_at ?? user.created_at ?? new Date().toISOString(),
+    pendingEmail,
   })
 
   return NextResponse.json<AccountProfileUpdateResponse>({ profile: accountProfile })
@@ -159,7 +165,14 @@ function deriveNameFromEmail(email: string): string {
 
 async function buildAccountProfile(
   supabase: Awaited<ReturnType<typeof createRouteHandlerSupabaseClient>>,
-  params: { id: string; email: string; displayName: string; avatarPath: string | null; joinedAt: string },
+  params: {
+    id: string
+    email: string
+    displayName: string
+    avatarPath: string | null
+    joinedAt: string
+    pendingEmail: string | null
+  },
 ): Promise<AccountProfile> {
   const avatarUrl = params.avatarPath ? await signAvatarUrl(supabase, params.avatarPath) : null
 
@@ -169,6 +182,7 @@ async function buildAccountProfile(
     displayName: params.displayName,
     avatarUrl,
     joinedAt: params.joinedAt,
+    pendingEmail: params.pendingEmail,
   }
 }
 
@@ -194,6 +208,12 @@ function validateAvatarFile(file: File): { valid: true } | { valid: false; messa
   }
 
   return { valid: true }
+}
+
+function extractPendingEmail(user: { [key: string]: unknown } | null): string | null {
+  if (!user) return null
+  const newEmail = (user as { new_email?: string | null }).new_email ?? null
+  return newEmail ?? null
 }
 
 async function uploadAvatar(
