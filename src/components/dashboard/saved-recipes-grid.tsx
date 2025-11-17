@@ -64,8 +64,8 @@ export function SavedRecipesGrid({ recipes }: SavedRecipesGridProps) {
           <InputGroupInput
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search saved recipes"
-            aria-label="Search saved recipes"
+            placeholder="Search saved brews"
+            aria-label="Search saved brews"
             className="pl-1"
           />
           {query ? (
@@ -85,7 +85,7 @@ export function SavedRecipesGrid({ recipes }: SavedRecipesGridProps) {
         </InputGroup>
 
         <Select value={sort} onValueChange={setSort}>
-          <SelectTrigger className="self-end" aria-label="Sort saved recipes">
+          <SelectTrigger className="self-end" aria-label="Sort saved brews">
             <SelectValue placeholder="Sort" />
           </SelectTrigger>
           <SelectContent align="end">

@@ -8,7 +8,7 @@ import { ChevronDown, Loader2, Minus, Plus } from "lucide-react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import {
@@ -516,9 +516,6 @@ export function RecipeGeneratorForm({ userId }: RecipeGeneratorFormProps) {
     <Card>
       <Form {...form}>
         <form onSubmit={handleSubmit} className="space-y-6">
-          <CardHeader>
-            <CardTitle className="text-lg font-medium tracking-tight">Pour tracker</CardTitle>
-          </CardHeader>
 
           <CardContent className="space-y-6">
             <FormField

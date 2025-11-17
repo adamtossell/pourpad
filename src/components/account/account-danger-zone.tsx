@@ -38,7 +38,7 @@ export function AccountDangerZone() {
       </CardHeader>
       <CardContent className="space-y-4 text-sm">
         <p className="text-muted-foreground">
-          Permanently remove your account, recipes, and pour history. This action cannot be undone.
+          Permanently remove your account, saved brews, and pour history. This action cannot be undone.
         </p>
         <Separator className="bg-rose-200 dark:bg-rose-800/60" />
         <AlertDialog>
@@ -51,8 +51,7 @@ export function AccountDangerZone() {
             <AlertDialogHeader>
               <AlertDialogTitle>Delete account?</AlertDialogTitle>
               <AlertDialogDescription>
-                Your profile, saved recipes, and daily brews will be permanently removed. This cannot be
-                reversed.
+                Your profile, saved brews, and daily brews will be permanently removed. This cannot be reversed.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

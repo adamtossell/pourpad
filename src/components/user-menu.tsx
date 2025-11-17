@@ -3,7 +3,7 @@
 import { useTransition } from "react"
 import Link from "next/link"
 
-import { Bookmark, Coffee, Home, LogOut } from "lucide-react"
+import { Bookmark, CirclePlus, Coffee, LogOut, User } from "lucide-react"
 
 import { logoutAction } from "@/app/actions/logout"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -54,21 +54,27 @@ export function UserMenu({ user }: UserMenuProps) {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild className="gap-2">
-          <Link href="/dashboard" className="flex w-full items-center">
-            <Home className="h-4 w-4" />
-            <span className="ml-2">Dashboard</span>
+          <Link href="/dashboard/generator" className="flex w-full items-center">
+            <CirclePlus className="h-4 w-4" />
+            <span className="ml-2">Make a brew</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild className="gap-2">
-          <Link href="/pours" className="flex w-full items-center">
+          <Link href="/dashboard/daily-brews" className="flex w-full items-center">
             <Coffee className="h-4 w-4" />
-            <span className="ml-2">Your pours</span>
+            <span className="ml-2">Your brews</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild className="gap-2">
-          <Link href="/saved" className="flex w-full items-center">
+          <Link href="/dashboard/saved-brews" className="flex w-full items-center">
             <Bookmark className="h-4 w-4" />
-            <span className="ml-2">Saved</span>
+            <span className="ml-2">Saved brews</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild className="gap-2">
+          <Link href="/account" className="flex w-full items-center">
+            <User className="h-4 w-4" />
+            <span className="ml-2">Account</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
