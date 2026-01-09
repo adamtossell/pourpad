@@ -1,6 +1,7 @@
 "use client"
 
 import { useMemo, useState } from "react"
+import { useRouter } from "next/navigation"
 import { Search, X } from "lucide-react"
 
 import type { DailyBrewSummary } from "@/lib/types/dashboard"
@@ -18,8 +19,13 @@ type DailyBrewsGridProps = {
 }
 
 export function DailyBrewsGrid({ recipes }: DailyBrewsGridProps) {
+  const router = useRouter()
   const [query, setQuery] = useState("")
   const [sort, setSort] = useState("newest")
+
+  const handleRecipeUpdate = () => {
+    router.refresh()
+  }
 
   const filteredRecipes = useMemo(() => {
     const normalized = query.trim().toLowerCase()
@@ -97,7 +103,11 @@ export function DailyBrewsGrid({ recipes }: DailyBrewsGridProps) {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {sortedRecipes.map((recipe) => (
-          <DailyBrewExpandableCard key={recipe.id} recipe={recipe} />
+          <DailyBrewExpandableCard
+            key={recipe.id}
+            recipe={recipe}
+            onRecipeUpdate={handleRecipeUpdate}
+          />
         ))}
       </div>
     </div>

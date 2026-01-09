@@ -57,5 +57,23 @@ export const recipeCreateSchema = z.object({
     .max(20, "Maximum of 20 pours"),
 })
 
+export const recipeUpdateSchema = z.object({
+  title: optionalTitleString,
+  description: nullableTrimmedString,
+  brewerType: z.enum(brewerTypes, {
+    errorMap: () => ({ message: "Select a brewer type" }),
+  }),
+  coffeeWeight: z.number().positive().max(1000).optional(),
+  grindSize: nullableTrimmedString,
+  grinderId: optionalTrimmedString,
+  waterTemp: z.number().int().positive().max(150).optional(),
+  totalBrewTime: z.number().int().positive().max(3600).optional(),
+  pours: z
+    .array(recipePourSchema)
+    .min(1, "At least one pour is required")
+    .max(20, "Maximum of 20 pours"),
+})
+
 export type RecipeCreateInput = z.infer<typeof recipeCreateSchema>
+export type RecipeUpdateInput = z.infer<typeof recipeUpdateSchema>
 export type RecipePourInput = z.infer<typeof recipePourSchema>

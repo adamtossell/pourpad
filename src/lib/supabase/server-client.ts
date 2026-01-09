@@ -24,13 +24,18 @@ export async function createServerSupabaseClient(cookieOptions?: CookieOptionsWi
       setAll: async (cookiesToSet) => {
         if (typeof cookieStore.set !== "function") return
 
-        cookiesToSet.forEach((cookie) => {
-          cookieStore.set?.({
-            name: cookie.name,
-            value: cookie.value,
-            ...(cookie.options ?? {}),
+        try {
+          cookiesToSet.forEach((cookie) => {
+            cookieStore.set?.({
+              name: cookie.name,
+              value: cookie.value,
+              ...(cookie.options ?? {}),
+            })
           })
-        })
+        } catch {
+          // Cookies can only be modified in a Server Action or Route Handler.
+          // This is expected when called from a Server Component.
+        }
       },
     },
   })

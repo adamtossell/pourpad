@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { ChevronDown } from "lucide-react"
+import { ChevronDown, Pencil } from "lucide-react"
 
 import type { DailyBrewSummary } from "@/lib/types/dashboard"
 import { cn } from "@/lib/utils"
@@ -9,13 +9,16 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { EditRecipeDialog } from "@/components/dashboard/edit-recipe-dialog"
 
 type DailyBrewExpandableCardProps = {
   recipe: DailyBrewSummary
+  onRecipeUpdate?: () => void
 }
 
-export function DailyBrewExpandableCard({ recipe }: DailyBrewExpandableCardProps) {
+export function DailyBrewExpandableCard({ recipe, onRecipeUpdate }: DailyBrewExpandableCardProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
 
   return (
     <Card key={recipe.id} className="flex h-full flex-col gap-1">
@@ -27,9 +30,21 @@ export function DailyBrewExpandableCard({ recipe }: DailyBrewExpandableCardProps
             </span>
             <span className="text-muted-foreground text-xs">{formatDateTime(recipe.createdAt)}</span>
           </div>
-          <Badge variant="outline" className="rounded-full px-3 py-1 text-xs uppercase tracking-wide">
-            {recipe.brewerType}
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setIsEditDialogOpen(true)}
+              aria-label="Edit recipe"
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+            <Badge variant="outline" className="rounded-full px-3 py-1 text-xs uppercase tracking-wide">
+              {recipe.brewerType}
+            </Badge>
+          </div>
         </div>
         <CardTitle className="text-xl font-medium tracking-tight">{recipe.title}</CardTitle>
       </CardHeader>
@@ -89,6 +104,13 @@ export function DailyBrewExpandableCard({ recipe }: DailyBrewExpandableCardProps
           </div>
         ) : null}
       </CardFooter>
+
+      <EditRecipeDialog
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        recipe={recipe}
+        onSave={() => onRecipeUpdate?.()}
+      />
     </Card>
   )
 }
