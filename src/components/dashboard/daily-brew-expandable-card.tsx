@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { ChevronDown, Pencil } from "lucide-react"
+import { ChevronDown, Copy, Pencil } from "lucide-react"
 
 import type { DailyBrewSummary } from "@/lib/types/dashboard"
 import { cn } from "@/lib/utils"
@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { DuplicateRecipeDialog } from "@/components/dashboard/duplicate-recipe-dialog"
 import { EditRecipeDialog } from "@/components/dashboard/edit-recipe-dialog"
 
 type DailyBrewExpandableCardProps = {
@@ -19,6 +20,7 @@ type DailyBrewExpandableCardProps = {
 export function DailyBrewExpandableCard({ recipe, onRecipeUpdate }: DailyBrewExpandableCardProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [isDuplicateDialogOpen, setIsDuplicateDialogOpen] = useState(false)
 
   return (
     <Card key={recipe.id} className="flex h-full flex-col gap-1">
@@ -30,21 +32,9 @@ export function DailyBrewExpandableCard({ recipe, onRecipeUpdate }: DailyBrewExp
             </span>
             <span className="text-muted-foreground text-xs">{formatDateTime(recipe.createdAt)}</span>
           </div>
-          <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => setIsEditDialogOpen(true)}
-              aria-label="Edit recipe"
-            >
-              <Pencil className="h-4 w-4" />
-            </Button>
-            <Badge variant="outline" className="rounded-full px-3 py-1 text-xs uppercase tracking-wide">
-              {recipe.brewerType}
-            </Badge>
-          </div>
+          <Badge variant="outline" className="rounded-full px-3 py-1 text-xs uppercase tracking-wide">
+            {recipe.brewerType}
+          </Badge>
         </div>
         <CardTitle className="text-xl font-medium tracking-tight">{recipe.title}</CardTitle>
       </CardHeader>
@@ -63,16 +53,41 @@ export function DailyBrewExpandableCard({ recipe, onRecipeUpdate }: DailyBrewExp
       </CardContent>
 
       <CardFooter className="mt-2 flex flex-col items-stretch gap-3">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => setIsOpen((prev) => !prev)}
-          aria-expanded={isOpen}
-        >
-          Pour schedule
-          <ChevronDown className={cn("h-4 w-4 transition", isOpen && "rotate-180")} />
-        </Button>
+        <div className="flex items-center justify-between">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="w-fit"
+            onClick={() => setIsOpen((prev) => !prev)}
+            aria-expanded={isOpen}
+          >
+            Pour schedule
+            <ChevronDown className={cn("h-4 w-4 transition", isOpen && "rotate-180")} />
+          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setIsDuplicateDialogOpen(true)}
+              aria-label="Duplicate recipe"
+            >
+              <Copy className="h-4 w-4" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setIsEditDialogOpen(true)}
+              aria-label="Edit recipe"
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
         {isOpen ? (
           <div className="w-full overflow-hidden rounded-lg border">
             <Table>
@@ -108,6 +123,13 @@ export function DailyBrewExpandableCard({ recipe, onRecipeUpdate }: DailyBrewExp
       <EditRecipeDialog
         open={isEditDialogOpen}
         onOpenChange={setIsEditDialogOpen}
+        recipe={recipe}
+        onSave={() => onRecipeUpdate?.()}
+      />
+
+      <DuplicateRecipeDialog
+        open={isDuplicateDialogOpen}
+        onOpenChange={setIsDuplicateDialogOpen}
         recipe={recipe}
         onSave={() => onRecipeUpdate?.()}
       />
