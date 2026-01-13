@@ -41,9 +41,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { AddCoffeeDialog } from "@/components/add-coffee-dialog"
 import { useGrinders } from "@/hooks/use-grinders"
+import { useCoffees, createCoffee } from "@/hooks/use-coffees"
 import type { DailyBrewSummary } from "@/lib/types/dashboard"
 import { brewerTypes, type RecipeCreateInput } from "@/lib/validators/recipe"
+import { coffeeCreateSchema, type CoffeeCreateFormValues } from "@/lib/validators/coffee"
 
 const TIME_PATTERN = /^\d{1,2}:\d{2}$/
 
@@ -186,6 +189,18 @@ const optionalGrindSchema = z
   .transform((value) => (value.length > 0 ? value : undefined))
 
 const NO_GRINDER_VALUE = "__none"
+const NO_COFFEE_VALUE = "__none"
+
+const coffeeDialogInitialValues: CoffeeCreateFormValues = {
+  name: "",
+  roaster: "",
+  origin: "",
+  roastLevel: undefined,
+  processType: undefined,
+  roastedDate: undefined,
+  tasteProfile: [],
+  notes: "",
+}
 
 const duplicateRecipeFormSchema = z
   .object({
@@ -198,6 +213,7 @@ const duplicateRecipeFormSchema = z
     }),
     grindSize: optionalGrindSchema,
     grinderId: z.string().optional(),
+    coffeeId: z.string().optional(),
     waterTemp: optionalPositiveIntegerField({
       invalidMessage: "Enter a number",
       max: { value: 150, message: "Maximum 150°C" },
@@ -299,6 +315,22 @@ export function DuplicateRecipeDialog({ open, onOpenChange, recipe, onSave }: Du
     isError: isUserGrindersError,
   } = useGrinders()
 
+  const {
+    coffees,
+    isLoading: isLoadingCoffees,
+    isError: isCoffeesError,
+    refresh: refreshCoffees,
+  } = useCoffees()
+
+  const [isCoffeeDialogOpen, setIsCoffeeDialogOpen] = React.useState(false)
+
+  const coffeeDialogForm = useForm<CoffeeCreateFormValues>({
+    resolver: zodResolver(coffeeCreateSchema, undefined, { raw: true }),
+    defaultValues: coffeeDialogInitialValues,
+  })
+
+  const isCreatingCoffee = coffeeDialogForm.formState.isSubmitting
+
   const createDefaultValues = React.useCallback((): DuplicateRecipeFormValues => ({
     title: "",
     description: recipe.description ?? "",
@@ -306,6 +338,7 @@ export function DuplicateRecipeDialog({ open, onOpenChange, recipe, onSave }: Du
     coffeeWeight: recipe.metadata.coffeeWeight?.toString() ?? "",
     grindSize: recipe.metadata.grindSize ?? "",
     grinderId: recipe.metadata.grinderId ?? "",
+    coffeeId: recipe.metadata.coffeeId ?? "",
     waterTemp: recipe.metadata.waterTemp?.toString() ?? "",
     totalBrewTime: secondsToTimeString(recipe.metadata.totalBrewTimeSeconds),
     pours: recipe.pours.map((pour) => ({
@@ -331,6 +364,12 @@ export function DuplicateRecipeDialog({ open, onOpenChange, recipe, onSave }: Du
   const selectedGrinder = React.useMemo(
     () => grinders.find((grinder) => grinder.id === selectedGrinderId) ?? null,
     [grinders, selectedGrinderId]
+  )
+
+  const selectedCoffeeId = useWatch({ control: form.control, name: "coffeeId" })
+  const selectedCoffee = React.useMemo(
+    () => coffees.find((coffee) => coffee.id === selectedCoffeeId) ?? null,
+    [coffees, selectedCoffeeId]
   )
 
   const {
@@ -380,6 +419,56 @@ export function DuplicateRecipeDialog({ open, onOpenChange, recipe, onSave }: Du
     [form, grinders],
   )
 
+  const handleCoffeeSelect = React.useCallback(
+    (value: string) => {
+      if (value === NO_COFFEE_VALUE) {
+        form.setValue("coffeeId", undefined, {
+          shouldDirty: true,
+          shouldTouch: true,
+        })
+        return
+      }
+
+      form.setValue("coffeeId", value, {
+        shouldDirty: true,
+        shouldTouch: true,
+      })
+    },
+    [form],
+  )
+
+  const handleCoffeeDialogClose = React.useCallback(() => {
+    setIsCoffeeDialogOpen(false)
+    coffeeDialogForm.reset(coffeeDialogInitialValues)
+  }, [coffeeDialogForm])
+
+  const handleCreateCoffee = React.useCallback(
+    async (values: CoffeeCreateFormValues, image: File | null) => {
+      try {
+        const parsed = coffeeCreateSchema.parse(values)
+        const coffee = await createCoffee(parsed, image)
+        toast.success("Coffee saved")
+        await refreshCoffees()
+        form.setValue("coffeeId", coffee.id, {
+          shouldDirty: true,
+          shouldTouch: true,
+        })
+        handleCoffeeDialogClose()
+      } catch (error) {
+        if (error instanceof z.ZodError) {
+          console.error("Coffee dialog validation failed", error.flatten().fieldErrors)
+          toast.error("Check coffee details")
+          return
+        }
+
+        const message = error instanceof Error ? error.message : "Failed to save coffee"
+        console.error("Failed to create coffee", error)
+        toast.error(message)
+      }
+    },
+    [form, refreshCoffees, handleCoffeeDialogClose],
+  )
+
   const handleSubmit = form.handleSubmit(async (values) => {
     const result = duplicateRecipeFormSchema.safeParse(values)
 
@@ -398,7 +487,7 @@ export function DuplicateRecipeDialog({ open, onOpenChange, recipe, onSave }: Du
       coffeeWeight: parsed.coffeeWeight,
       grindSize: parsed.grindSize ?? null,
       grinderId: parsed.grinderId,
-      coffeeId: undefined,
+      coffeeId: parsed.coffeeId,
       waterTemp: parsed.waterTemp,
       totalBrewTime: parsed.totalBrewTime,
       pours: parsed.pours.map((pour, index) => ({
@@ -450,7 +539,7 @@ export function DuplicateRecipeDialog({ open, onOpenChange, recipe, onSave }: Du
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+      <AlertDialogContent className="max-h-[90vh] overflow-y-auto">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-lg font-medium tracking-tight">
             Duplicate recipe
@@ -499,6 +588,65 @@ export function DuplicateRecipeDialog({ open, onOpenChange, recipe, onSave }: Du
                   </FormItem>
                 )}
               />
+
+              <div className="space-y-2">
+                <FormLabel>Coffee</FormLabel>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full justify-between font-normal"
+                      disabled={isLoadingCoffees || Boolean(isCoffeesError)}
+                    >
+                      {isLoadingCoffees ? (
+                        <span className="flex items-center gap-2">
+                          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                          <span>Loading...</span>
+                        </span>
+                      ) : (
+                        <span className="truncate">
+                          {selectedCoffee ? selectedCoffee.name : "Select coffee"}
+                        </span>
+                      )}
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="w-[var(--radix-dropdown-menu-trigger-width)]">
+                    <DropdownMenuItem onSelect={() => handleCoffeeSelect(NO_COFFEE_VALUE)}>
+                      <div className="flex flex-col text-left">
+                        <span className="font-medium">No coffee</span>
+                        <span className="text-xs text-muted-foreground">Skip coffee selection</span>
+                      </div>
+                    </DropdownMenuItem>
+                    {coffees.length > 0 && (
+                      <>
+                        <DropdownMenuSeparator />
+                        {coffees.map((coffee) => (
+                          <DropdownMenuItem
+                            key={coffee.id}
+                            onSelect={() => handleCoffeeSelect(coffee.id)}
+                          >
+                            <div className="flex flex-col text-left">
+                              <span className="font-medium">{coffee.name}</span>
+                              {coffee.roaster && (
+                                <span className="text-xs text-muted-foreground">
+                                  {coffee.roaster}
+                                  {coffee.origin && ` · ${coffee.origin}`}
+                                </span>
+                              )}
+                            </div>
+                          </DropdownMenuItem>
+                        ))}
+                      </>
+                    )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onSelect={() => setIsCoffeeDialogOpen(true)}>
+                      Add coffee
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
 
               <div className="space-y-4">
                 <div className="grid gap-4 md:grid-cols-2">
@@ -815,6 +963,15 @@ export function DuplicateRecipeDialog({ open, onOpenChange, recipe, onSave }: Du
           </form>
         </Form>
       </AlertDialogContent>
+
+      <AddCoffeeDialog
+        open={isCoffeeDialogOpen}
+        onOpenChange={setIsCoffeeDialogOpen}
+        onClose={handleCoffeeDialogClose}
+        form={coffeeDialogForm}
+        onSubmit={handleCreateCoffee}
+        isSubmitting={isCreatingCoffee}
+      />
     </AlertDialog>
   )
 }

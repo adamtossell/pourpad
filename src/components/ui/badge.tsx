@@ -14,7 +14,7 @@ const badgeVariants = cva(
         light:
           "border-transparent bg-primary-foreground text-primary [a&]:hover:bg-secondary/90",
         secondary:
-          "border-transparent bg-accent text-foreground [a&]:hover:bg-secondary/90",
+          "border-border bg-muted text-foreground [a&]:hover:bg-secondary/90",
         destructive:
           "border-transparent bg-destructive text-white [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
         outline:
@@ -46,3 +46,4 @@ function Badge({
 }
 
 export { Badge, badgeVariants }
+  

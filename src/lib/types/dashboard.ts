@@ -13,6 +13,8 @@ export type RecipeMetadata = {
   grindSize?: string | null
   grinderId?: string | null
   grinderName?: string | null
+  coffeeId?: string | null
+  coffeeName?: string | null
   waterTemp?: number | null
   totalBrewTimeSeconds?: number | null
 }

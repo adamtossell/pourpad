@@ -35,7 +35,7 @@ export function RecipeDetailsDialog({ recipe, triggerLabel = "View details" }: R
           {triggerLabel}
         </Button>
       </AlertDialogTrigger>
-      <AlertDialogContent className="max-h-[85vh] overflow-y-auto">
+      <AlertDialogContent className="max-h-[90vh] overflow-y-auto">
         <AlertDialogHeader className="space-y-3 text-left">
           <div className="space-y-3">
             <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">

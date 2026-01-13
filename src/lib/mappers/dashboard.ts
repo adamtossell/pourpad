@@ -16,6 +16,11 @@ type GrinderRow = {
   brand: string | null
 }
 
+type CoffeeRow = {
+  id: string
+  name: string
+}
+
 type RecipeRow = {
   id: string
   title: string
@@ -24,12 +29,14 @@ type RecipeRow = {
   coffee_weight: NumericLike
   grind_size: string | null
   grinder_id: string | null
+  coffee_id: string | null
   water_temp: NumericLike
   total_brew_time: NumericLike
   is_public: boolean
   created_at: string
   recipe_pours: RecipePourRow[] | null
   user_grinders: GrinderRow | null
+  user_coffees: CoffeeRow | null
 }
 
 type RecipeAuthorRow = {
@@ -40,10 +47,11 @@ type RecipeAuthorRow = {
 
 type SavedRecipeRow = {
   created_at: string
-  recipe: (Omit<RecipeRow, 'user_grinders'> & {
+  recipe: (Omit<RecipeRow, 'user_grinders' | 'user_coffees'> & {
     user_id: string
     owner: RecipeAuthorRow | null
     user_grinders: GrinderRow | null
+    user_coffees: CoffeeRow | null
   }) | null
 }
 
@@ -54,6 +62,9 @@ export function mapRecipeRowToDailyBrew(row: RecipeRow): DailyBrewSummary {
       ? `${grinder.brand} ${grinder.model}`
       : grinder.model
     : null
+
+  const coffee = row.user_coffees
+  const coffeeName = coffee?.name ?? null
 
   return {
     id: row.id,
@@ -69,6 +80,8 @@ export function mapRecipeRowToDailyBrew(row: RecipeRow): DailyBrewSummary {
       grindSize: row.grind_size,
       grinderId: row.grinder_id,
       grinderName,
+      coffeeId: row.coffee_id,
+      coffeeName,
       waterTemp: toNumber(row.water_temp),
       totalBrewTimeSeconds: toNumber(row.total_brew_time),
     },
@@ -88,6 +101,9 @@ export function mapSavedRecipeRow(row: SavedRecipeRow): SavedRecipeSummary | nul
       : grinder.model
     : null
 
+  const coffee = row.recipe.user_coffees
+  const coffeeName = coffee?.name ?? null
+
   return {
     id: row.recipe.id,
     title: row.recipe.title,
@@ -106,6 +122,8 @@ export function mapSavedRecipeRow(row: SavedRecipeRow): SavedRecipeSummary | nul
       grindSize: row.recipe.grind_size,
       grinderId: row.recipe.grinder_id,
       grinderName,
+      coffeeId: row.recipe.coffee_id,
+      coffeeName,
       waterTemp: toNumber(row.recipe.water_temp),
       totalBrewTimeSeconds: toNumber(row.recipe.total_brew_time),
     },

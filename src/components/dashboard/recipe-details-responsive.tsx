@@ -6,12 +6,13 @@ import type { DailyBrewSummary, SavedRecipeSummary } from "@/lib/types/dashboard
 import { useMediaQuery } from "@/hooks/use-media-query"
 import { Button } from "@/components/ui/button"
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog"
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogFooter,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog"
 import {
   Drawer,
   DrawerContent,
@@ -27,7 +28,8 @@ type RecipeDetailsResponsiveProps = {
   variant: "daily-brew" | "saved-recipe"
   open: boolean
   onOpenChange: (open: boolean) => void
-  actions?: React.ReactNode
+  headerAction?: React.ReactNode
+  footerAction?: React.ReactNode
 }
 
 export function RecipeDetailsResponsive({
@@ -35,27 +37,30 @@ export function RecipeDetailsResponsive({
   variant,
   open,
   onOpenChange,
-  actions,
+  headerAction,
+  footerAction,
 }: RecipeDetailsResponsiveProps) {
   const isDesktop = useMediaQuery("(min-width: 768px)")
 
   if (isDesktop) {
     return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-h-[85vh] max-w-2xl overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-medium tracking-tight">
-              {recipe.title}
-            </DialogTitle>
-          </DialogHeader>
+      <AlertDialog open={open} onOpenChange={onOpenChange}>
+        <AlertDialogContent className="max-h-[90vh] overflow-y-auto">
+          <AlertDialogHeader>
+            <div className="flex items-center justify-between gap-4">
+              <AlertDialogTitle className="text-xl font-medium tracking-tight">
+                {recipe.title}
+              </AlertDialogTitle>
+              {headerAction}
+            </div>
+          </AlertDialogHeader>
           <RecipeDetailsContent recipe={recipe} variant={variant} />
-          {actions && (
-            <DialogFooter className="gap-2">
-              {actions}
-            </DialogFooter>
-          )}
-        </DialogContent>
-      </Dialog>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Close</AlertDialogCancel>
+            {footerAction}
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     )
   }
 
@@ -63,18 +68,21 @@ export function RecipeDetailsResponsive({
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent className="max-h-[90vh]">
         <DrawerHeader className="text-left">
-          <DrawerTitle className="text-xl font-medium tracking-tight">
-            {recipe.title}
-          </DrawerTitle>
+          <div className="flex items-center justify-between gap-4">
+            <DrawerTitle className="text-xl font-medium tracking-tight">
+              {recipe.title}
+            </DrawerTitle>
+            {headerAction}
+          </div>
         </DrawerHeader>
         <div className="overflow-y-auto px-4">
           <RecipeDetailsContent recipe={recipe} variant={variant} />
         </div>
         <DrawerFooter className="gap-2">
-          {actions}
           <DrawerClose asChild>
             <Button variant="outline">Close</Button>
           </DrawerClose>
+          {footerAction}
         </DrawerFooter>
       </DrawerContent>
     </Drawer>

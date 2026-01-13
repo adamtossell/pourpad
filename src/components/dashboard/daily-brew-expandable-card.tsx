@@ -96,28 +96,29 @@ export function DailyBrewExpandableCard({ recipe, onRecipeUpdate }: DailyBrewExp
         variant="daily-brew"
         open={isDetailsOpen}
         onOpenChange={setIsDetailsOpen}
-        actions={
-          <>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setIsDetailsOpen(false)
-                setIsDuplicateDialogOpen(true)
-              }}
-            >
-              <Copy className="h-4 w-4 mr-2" />
-              Duplicate
-            </Button>
-            <Button
-              onClick={() => {
-                setIsDetailsOpen(false)
-                setIsEditDialogOpen(true)
-              }}
-            >
-              <Pencil className="h-4 w-4 mr-2" />
-              Edit
-            </Button>
-          </>
+        headerAction={
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setIsDetailsOpen(false)
+              setIsDuplicateDialogOpen(true)
+            }}
+          >
+            <Copy className="h-4 w-4 mr-2" />
+            Duplicate
+          </Button>
+        }
+        footerAction={
+          <Button
+            onClick={() => {
+              setIsDetailsOpen(false)
+              setIsEditDialogOpen(true)
+            }}
+          >
+            <Pencil className="h-4 w-4 mr-2" />
+            Edit
+          </Button>
         }
       />
 

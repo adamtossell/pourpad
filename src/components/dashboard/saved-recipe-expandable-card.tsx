@@ -76,17 +76,17 @@ export function SavedRecipeExpandableCard({ recipe }: SavedRecipeExpandableCardP
         variant="saved-recipe"
         open={isDetailsOpen}
         onOpenChange={setIsDetailsOpen}
-        actions={
-          <>
-            <Button variant="outline">
-              <Bookmark className="h-4 w-4 mr-2" />
-              Save recipe
-            </Button>
-            <Button>
-              <Copy className="h-4 w-4 mr-2" />
-              Use this recipe
-            </Button>
-          </>
+        headerAction={
+          <Button variant="outline" size="sm">
+            <Bookmark className="h-4 w-4 mr-2" />
+            Save
+          </Button>
+        }
+        footerAction={
+          <Button>
+            <Copy className="h-4 w-4 mr-2" />
+            Use this recipe
+          </Button>
         }
       />
     </Card>

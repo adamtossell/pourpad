@@ -93,6 +93,25 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     grinderId = grinder.id
   }
 
+  let coffeeId: string | null = null
+  if (payload.coffeeId) {
+    const { data: coffee, error: coffeeError } = await supabase
+      .from("user_coffees")
+      .select("id")
+      .eq("id", payload.coffeeId)
+      .eq("user_id", user.id)
+      .single()
+
+    if (coffeeError || !coffee) {
+      return NextResponse.json<ApiErrorResponse>(
+        { error: "Invalid coffee selection" },
+        { status: 400 }
+      )
+    }
+
+    coffeeId = coffee.id
+  }
+
   const recipeUpdate = {
     title: payload.title ?? existingRecipe.id,
     description: payload.description ?? null,
@@ -100,6 +119,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     coffee_weight: payload.coffeeWeight ?? null,
     grind_size: payload.grindSize ?? null,
     grinder_id: grinderId,
+    coffee_id: coffeeId,
     water_temp: payload.waterTemp ?? null,
     total_brew_time: payload.totalBrewTime ?? null,
   }
