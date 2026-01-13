@@ -69,6 +69,25 @@ export async function POST(request: Request) {
     grinderId = grinder.id
   }
 
+  let coffeeId: string | undefined
+  if (payload.coffeeId) {
+    const { data: coffee, error: coffeeError } = await supabase
+      .from("user_coffees")
+      .select("id")
+      .eq("id", payload.coffeeId)
+      .eq("user_id", user.id)
+      .single()
+
+    if (coffeeError || !coffee) {
+      return NextResponse.json<ApiErrorResponse>(
+        { error: "Invalid coffee selection" },
+        { status: 400 }
+      )
+    }
+
+    coffeeId = coffee.id
+  }
+
   const recipeInsert = {
     user_id: user.id,
     title: payload.title ?? generateDefaultRecipeTitle(),
@@ -77,6 +96,7 @@ export async function POST(request: Request) {
     coffee_weight: payload.coffeeWeight ?? null,
     grind_size: payload.grindSize ?? null,
     grinder_id: grinderId ?? null,
+    coffee_id: coffeeId ?? null,
     water_temp: payload.waterTemp ?? null,
     total_brew_time: payload.totalBrewTime ?? null,
     is_public: false,
@@ -148,5 +168,5 @@ function generateDefaultRecipeTitle() {
     minute: "2-digit",
   })
 
-  return `Brew · ${formatter.format(now)}`
+  return formatter.format(now)
 }

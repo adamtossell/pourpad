@@ -398,6 +398,7 @@ export function EditRecipeDialog({ open, onOpenChange, recipe, onSave }: EditRec
       coffeeWeight: parsed.coffeeWeight,
       grindSize: parsed.grindSize ?? null,
       grinderId: parsed.grinderId,
+      coffeeId: undefined,
       waterTemp: parsed.waterTemp,
       totalBrewTime: parsed.totalBrewTime,
       pours: parsed.pours.map((pour, index) => ({
