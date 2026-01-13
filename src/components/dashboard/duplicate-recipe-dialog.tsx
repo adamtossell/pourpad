@@ -606,7 +606,9 @@ export function DuplicateRecipeDialog({ open, onOpenChange, recipe, onSave }: Du
                                           <span className="truncate">
                                             {selectedGrinder
                                               ? formatGrinderDisplay(selectedGrinder)
-                                              : "Select grinder"}
+                                              : selectedGrinderId && recipe.metadata.grinderName
+                                                ? recipe.metadata.grinderName
+                                                : "Select grinder"}
                                           </span>
                                           <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
                                         </span>

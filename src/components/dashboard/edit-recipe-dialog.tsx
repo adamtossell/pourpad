@@ -608,7 +608,9 @@ export function EditRecipeDialog({ open, onOpenChange, recipe, onSave }: EditRec
                                           <span className="truncate">
                                             {selectedGrinder
                                               ? formatGrinderDisplay(selectedGrinder)
-                                              : "Select grinder"}
+                                              : selectedGrinderId && recipe.metadata.grinderName
+                                                ? recipe.metadata.grinderName
+                                                : "Select grinder"}
                                           </span>
                                           <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
                                         </span>
