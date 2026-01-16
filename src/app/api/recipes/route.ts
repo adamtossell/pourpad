@@ -88,6 +88,25 @@ export async function POST(request: Request) {
     coffeeId = coffee.id
   }
 
+  let coffeeFilterId: string | undefined
+  if (payload.coffeeFilterId) {
+    const { data: coffeeFilter, error: coffeeFilterError } = await supabase
+      .from("user_coffee_filters")
+      .select("id")
+      .eq("id", payload.coffeeFilterId)
+      .eq("user_id", user.id)
+      .single()
+
+    if (coffeeFilterError || !coffeeFilter) {
+      return NextResponse.json<ApiErrorResponse>(
+        { error: "Invalid coffee filter selection" },
+        { status: 400 }
+      )
+    }
+
+    coffeeFilterId = coffeeFilter.id
+  }
+
   const recipeInsert = {
     user_id: user.id,
     title: payload.title ?? generateDefaultRecipeTitle(),
@@ -97,6 +116,7 @@ export async function POST(request: Request) {
     grind_size: payload.grindSize ?? null,
     grinder_id: grinderId ?? null,
     coffee_id: coffeeId ?? null,
+    coffee_filter_id: coffeeFilterId ?? null,
     water_temp: payload.waterTemp ?? null,
     total_brew_time: payload.totalBrewTime ?? null,
     is_public: false,

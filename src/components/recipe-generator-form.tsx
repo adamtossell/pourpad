@@ -35,15 +35,18 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { ManageGrindersDialog } from "@/components/manage-grinders-dialog"
 import { AddCoffeeDialog } from "@/components/add-coffee-dialog"
+import { AddCoffeeFilterDialog } from "@/components/add-coffee-filter-dialog"
 import {
   createGrinder,
   useDefaultGrinders,
   useGrinders,
 } from "@/hooks/use-grinders"
 import { createCoffee, useCoffees } from "@/hooks/use-coffees"
+import { createCoffeeFilter, useCoffeeFilters } from "@/hooks/use-coffee-filters"
 import type { DefaultGrinder } from "@/lib/types/grinders"
 import { grinderCreateSchema, type GrinderCreateFormValues } from "@/lib/validators/grinder"
 import { coffeeCreateSchema, type CoffeeCreateFormValues } from "@/lib/validators/coffee"
+import { coffeeFilterCreateSchema, type CoffeeFilterCreateFormValues } from "@/lib/validators/coffee-filter"
 import { brewerTypes, recipeCreateSchema, type RecipeCreateInput } from "@/lib/validators/recipe"
 
 
@@ -189,6 +192,7 @@ const optionalGrindSchema = z
 
 const NO_GRINDER_VALUE = "__none"
 const NO_COFFEE_VALUE = "__none"
+const NO_COFFEE_FILTER_VALUE = "__none"
 
 const recipeFormSchema = z
   .object({
@@ -202,6 +206,7 @@ const recipeFormSchema = z
     grindSize: optionalGrindSchema,
     grinderId: z.string().optional(),
     coffeeId: z.string().optional(),
+    coffeeFilterId: z.string().optional(),
     waterTemp: optionalPositiveIntegerField({
       invalidMessage: "Enter a number",
       max: { value: 150, message: "Maximum 150°C" },
@@ -278,6 +283,14 @@ const coffeeDialogInitialValues: CoffeeDialogFormValues = {
   notes: "",
 }
 
+type CoffeeFilterDialogFormValues = CoffeeFilterCreateFormValues
+
+const coffeeFilterDialogInitialValues: CoffeeFilterDialogFormValues = {
+  name: "",
+  brand: "",
+  notes: "",
+}
+
 const sortDefaultGrinders = (defaults: DefaultGrinder[]) =>
   [...defaults].sort((a, b) => a.model.localeCompare(b.model))
 
@@ -292,6 +305,7 @@ const createDefaultValues = (): RecipeFormValues => ({
   grindSize: "",
   grinderId: "",
   coffeeId: "",
+  coffeeFilterId: "",
   waterTemp: "",
   totalBrewTime: "",
   pours: [
@@ -325,6 +339,12 @@ export function RecipeGeneratorForm({ userId }: RecipeGeneratorFormProps) {
     isError: isCoffeesError,
     refresh: refreshCoffees,
   } = useCoffees()
+  const {
+    coffeeFilters,
+    isLoading: isLoadingCoffeeFilters,
+    isError: isCoffeeFiltersError,
+    refresh: refreshCoffeeFilters,
+  } = useCoffeeFilters()
 
   const form = useForm<RecipeFormValues>({
     resolver: zodResolver(recipeFormSchema, undefined, { raw: true }),
@@ -342,8 +362,14 @@ export function RecipeGeneratorForm({ userId }: RecipeGeneratorFormProps) {
     defaultValues: coffeeDialogInitialValues,
   })
 
+  const coffeeFilterDialogForm = useForm<CoffeeFilterDialogFormValues>({
+    resolver: zodResolver(coffeeFilterCreateSchema, undefined, { raw: true }),
+    defaultValues: coffeeFilterDialogInitialValues,
+  })
+
   const [isGrinderDialogOpen, setIsGrinderDialogOpen] = React.useState(false)
   const [isCoffeeDialogOpen, setIsCoffeeDialogOpen] = React.useState(false)
+  const [isCoffeeFilterDialogOpen, setIsCoffeeFilterDialogOpen] = React.useState(false)
   const selectedGrinderId = useWatch({ control: form.control, name: "grinderId" })
   const selectedGrinder = React.useMemo(
     () => grinders.find((grinder) => grinder.id === selectedGrinderId) ?? null,
@@ -360,6 +386,12 @@ export function RecipeGeneratorForm({ userId }: RecipeGeneratorFormProps) {
     [coffees, selectedCoffeeId]
   )
 
+  const selectedCoffeeFilterId = useWatch({ control: form.control, name: "coffeeFilterId" })
+  const selectedCoffeeFilter = React.useMemo(
+    () => coffeeFilters.find((filter) => filter.id === selectedCoffeeFilterId) ?? null,
+    [coffeeFilters, selectedCoffeeFilterId]
+  )
+
   const {
     fields: pourFields,
     append,
@@ -372,8 +404,10 @@ export function RecipeGeneratorForm({ userId }: RecipeGeneratorFormProps) {
   const isSaving = form.formState.isSubmitting
   const isLoadingSelector = isLoadingGrinders || isLoadingDefaults
   const isLoadingCoffeeSelector = isLoadingCoffees
+  const isLoadingCoffeeFilterSelector = isLoadingCoffeeFilters
   const isCreatingGrinder = grinderDialogForm.formState.isSubmitting
   const isCreatingCoffee = coffeeDialogForm.formState.isSubmitting
+  const isCreatingCoffeeFilter = coffeeFilterDialogForm.formState.isSubmitting
 
   const handleAddPour = React.useCallback(() => {
     append({
@@ -522,6 +556,58 @@ export function RecipeGeneratorForm({ userId }: RecipeGeneratorFormProps) {
     [form, refreshCoffees, handleCoffeeDialogClose],
   )
 
+  const handleCoffeeFilterSelect = React.useCallback(
+    (value: string) => {
+      if (value === NO_COFFEE_FILTER_VALUE) {
+        form.setValue("coffeeFilterId", undefined, {
+          shouldDirty: true,
+          shouldTouch: true,
+        })
+        form.clearErrors("coffeeFilterId")
+        return
+      }
+
+      form.setValue("coffeeFilterId", value, {
+        shouldDirty: true,
+        shouldTouch: true,
+      })
+      form.clearErrors("coffeeFilterId")
+    },
+    [form],
+  )
+
+  const handleCoffeeFilterDialogClose = React.useCallback(() => {
+    setIsCoffeeFilterDialogOpen(false)
+    coffeeFilterDialogForm.reset(coffeeFilterDialogInitialValues)
+  }, [coffeeFilterDialogForm])
+
+  const handleCreateCoffeeFilter = React.useCallback(
+    async (values: CoffeeFilterDialogFormValues) => {
+      try {
+        const parsed = coffeeFilterCreateSchema.parse(values)
+        const coffeeFilter = await createCoffeeFilter(parsed)
+        toast.success("Coffee filter saved")
+        await refreshCoffeeFilters()
+        form.setValue("coffeeFilterId", coffeeFilter.id, {
+          shouldDirty: true,
+          shouldTouch: true,
+        })
+        handleCoffeeFilterDialogClose()
+      } catch (error) {
+        if (error instanceof z.ZodError) {
+          console.error("Coffee filter dialog validation failed", error.flatten().fieldErrors)
+          toast.error("Check coffee filter details")
+          return
+        }
+
+        const message = error instanceof Error ? error.message : "Failed to save coffee filter"
+        console.error("Failed to create coffee filter", error)
+        toast.error(message)
+      }
+    },
+    [form, refreshCoffeeFilters, handleCoffeeFilterDialogClose],
+  )
+
   const handleSubmit = form.handleSubmit(async (values) => {
     if (!userId) {
       toast.error("Log in to save a recipe")
@@ -556,6 +642,7 @@ export function RecipeGeneratorForm({ userId }: RecipeGeneratorFormProps) {
       grindSize: parsed.grindSize ?? null,
       grinderId: parsed.grinderId,
       coffeeId: parsed.coffeeId,
+      coffeeFilterId: parsed.coffeeFilterId,
       waterTemp: parsed.waterTemp,
       totalBrewTime: parsed.totalBrewTime,
       pours: parsed.pours.map((pour, index) => ({
@@ -701,6 +788,64 @@ export function RecipeGeneratorForm({ userId }: RecipeGeneratorFormProps) {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onSelect={() => setIsCoffeeDialogOpen(true)}>
                     Add coffee
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            <div className="space-y-2">
+              <FormLabel>Coffee filter</FormLabel>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full justify-between font-normal"
+                    disabled={isLoadingCoffeeFilterSelector || Boolean(isCoffeeFiltersError)}
+                  >
+                    {isLoadingCoffeeFilterSelector ? (
+                      <span className="flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                        <span>Loading...</span>
+                      </span>
+                    ) : (
+                      <span className="truncate">
+                        {selectedCoffeeFilter ? selectedCoffeeFilter.name : "Select coffee filter"}
+                      </span>
+                    )}
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-[var(--radix-dropdown-menu-trigger-width)]">
+                  <DropdownMenuItem onSelect={() => handleCoffeeFilterSelect(NO_COFFEE_FILTER_VALUE)}>
+                    <div className="flex flex-col text-left">
+                      <span className="font-medium">No filter</span>
+                      <span className="text-xs text-muted-foreground">Skip filter selection</span>
+                    </div>
+                  </DropdownMenuItem>
+                  {coffeeFilters.length > 0 && (
+                    <>
+                      <DropdownMenuSeparator />
+                      {coffeeFilters.map((filter) => (
+                        <DropdownMenuItem
+                          key={filter.id}
+                          onSelect={() => handleCoffeeFilterSelect(filter.id)}
+                        >
+                          <div className="flex flex-col text-left">
+                            <span className="font-medium">{filter.name}</span>
+                            {filter.brand && (
+                              <span className="text-xs text-muted-foreground">
+                                {filter.brand}
+                              </span>
+                            )}
+                          </div>
+                        </DropdownMenuItem>
+                      ))}
+                    </>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={() => setIsCoffeeFilterDialogOpen(true)}>
+                    Add coffee filter
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -1057,6 +1202,15 @@ export function RecipeGeneratorForm({ userId }: RecipeGeneratorFormProps) {
             form={coffeeDialogForm}
             onSubmit={handleCreateCoffee}
             isSubmitting={isCreatingCoffee}
+          />
+
+          <AddCoffeeFilterDialog
+            open={isCoffeeFilterDialogOpen}
+            onOpenChange={setIsCoffeeFilterDialogOpen}
+            onClose={handleCoffeeFilterDialogClose}
+            form={coffeeFilterDialogForm}
+            onSubmit={handleCreateCoffeeFilter}
+            isSubmitting={isCreatingCoffeeFilter}
           />
 
           <CardFooter className="flex gap-3">

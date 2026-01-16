@@ -50,6 +50,7 @@ export const recipeCreateSchema = z.object({
   grindSize: nullableTrimmedString,
   grinderId: optionalTrimmedString,
   coffeeId: optionalTrimmedString,
+  coffeeFilterId: optionalTrimmedString,
   waterTemp: z.number().int().positive().max(150).optional(),
   totalBrewTime: z.number().int().positive().max(3600).optional(),
   pours: z
@@ -68,6 +69,7 @@ export const recipeUpdateSchema = z.object({
   grindSize: nullableTrimmedString,
   grinderId: optionalTrimmedString,
   coffeeId: optionalTrimmedString,
+  coffeeFilterId: optionalTrimmedString,
   waterTemp: z.number().int().positive().max(150).optional(),
   totalBrewTime: z.number().int().positive().max(3600).optional(),
   pours: z

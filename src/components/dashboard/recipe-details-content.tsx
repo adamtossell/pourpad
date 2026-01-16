@@ -59,6 +59,7 @@ export function RecipeDetailsContent({ recipe, variant }: RecipeDetailsContentPr
         <div className="grid gap-4 sm:grid-cols-2">
           <MetadataRow label="Coffee" value={recipe.metadata.coffeeName} />
           <MetadataRow label="Coffee weight" value={formatNullableWeight(recipe.metadata.coffeeWeight)} />
+          <MetadataRow label="Coffee filter" value={recipe.metadata.coffeeFilterName} />
           <MetadataRow label="Grind size" value={recipe.metadata.grindSize} />
           <MetadataRow label="Grinder" value={recipe.metadata.grinderName} />
           <MetadataRow label="Water temp" value={formatNullableTemperature(recipe.metadata.waterTemp)} />

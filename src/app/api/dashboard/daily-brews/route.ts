@@ -38,6 +38,7 @@ export async function GET() {
         grind_size,
         grinder_id,
         coffee_id,
+        coffee_filter_id,
         water_temp,
         total_brew_time,
         is_public,
@@ -55,6 +56,10 @@ export async function GET() {
           brand
         ),
         user_coffees (
+          id,
+          name
+        ),
+        user_coffee_filters (
           id,
           name
         )

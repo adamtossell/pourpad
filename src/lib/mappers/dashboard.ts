@@ -21,6 +21,11 @@ type CoffeeRow = {
   name: string
 }
 
+type CoffeeFilterRow = {
+  id: string
+  name: string
+}
+
 type RecipeRow = {
   id: string
   title: string
@@ -30,6 +35,7 @@ type RecipeRow = {
   grind_size: string | null
   grinder_id: string | null
   coffee_id: string | null
+  coffee_filter_id: string | null
   water_temp: NumericLike
   total_brew_time: NumericLike
   is_public: boolean
@@ -37,6 +43,7 @@ type RecipeRow = {
   recipe_pours: RecipePourRow[] | null
   user_grinders: GrinderRow | null
   user_coffees: CoffeeRow | null
+  user_coffee_filters: CoffeeFilterRow | null
 }
 
 type RecipeAuthorRow = {
@@ -47,11 +54,12 @@ type RecipeAuthorRow = {
 
 type SavedRecipeRow = {
   created_at: string
-  recipe: (Omit<RecipeRow, 'user_grinders' | 'user_coffees'> & {
+  recipe: (Omit<RecipeRow, 'user_grinders' | 'user_coffees' | 'user_coffee_filters'> & {
     user_id: string
     owner: RecipeAuthorRow | null
     user_grinders: GrinderRow | null
     user_coffees: CoffeeRow | null
+    user_coffee_filters: CoffeeFilterRow | null
   }) | null
 }
 
@@ -65,6 +73,9 @@ export function mapRecipeRowToDailyBrew(row: RecipeRow): DailyBrewSummary {
 
   const coffee = row.user_coffees
   const coffeeName = coffee?.name ?? null
+
+  const coffeeFilter = row.user_coffee_filters
+  const coffeeFilterName = coffeeFilter?.name ?? null
 
   return {
     id: row.id,
@@ -82,6 +93,8 @@ export function mapRecipeRowToDailyBrew(row: RecipeRow): DailyBrewSummary {
       grinderName,
       coffeeId: row.coffee_id,
       coffeeName,
+      coffeeFilterId: row.coffee_filter_id,
+      coffeeFilterName,
       waterTemp: toNumber(row.water_temp),
       totalBrewTimeSeconds: toNumber(row.total_brew_time),
     },
@@ -104,6 +117,9 @@ export function mapSavedRecipeRow(row: SavedRecipeRow): SavedRecipeSummary | nul
   const coffee = row.recipe.user_coffees
   const coffeeName = coffee?.name ?? null
 
+  const coffeeFilter = row.recipe.user_coffee_filters
+  const coffeeFilterName = coffeeFilter?.name ?? null
+
   return {
     id: row.recipe.id,
     title: row.recipe.title,
@@ -124,6 +140,8 @@ export function mapSavedRecipeRow(row: SavedRecipeRow): SavedRecipeSummary | nul
       grinderName,
       coffeeId: row.recipe.coffee_id,
       coffeeName,
+      coffeeFilterId: row.recipe.coffee_filter_id,
+      coffeeFilterName,
       waterTemp: toNumber(row.recipe.water_temp),
       totalBrewTimeSeconds: toNumber(row.recipe.total_brew_time),
     },
