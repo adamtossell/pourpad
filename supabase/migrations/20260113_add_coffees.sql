@@ -6,6 +6,8 @@ create table public.user_coffees (
   roaster text,
   origin text,
   roast_level text,
+  process_type text,
+  roasted_date date,
   taste_profile text[],
   notes text,
   image_path text,
